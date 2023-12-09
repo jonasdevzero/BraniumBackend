@@ -1,0 +1,17 @@
+import { inject } from "@container";
+import { controller, route } from "@presentation/decorators";
+import { Controller, HttpRequest, HttpResponse } from "@presentation/protocols";
+import { {{ pascalCase name }} } from "@domain/use-cases/{{ generatePath module }}"
+
+@controller()
+@route.{{lowerCase httpMethod}}("{{dotCase module}}", "{{httpPath}}")
+export class {{pascalCase name}}Controller implements Controller {
+	constructor(
+		@inject.usecase("{{ pascalCase name }}")
+		private readonly {{ camelCase name }}: {{ pascalCase name }}
+	) {}
+
+  async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
+    throw "not implemented yet";
+  }
+}

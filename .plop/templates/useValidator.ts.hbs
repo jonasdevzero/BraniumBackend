@@ -1,0 +1,15 @@
+import { validator } from '@presentation/decorators';
+import { HttpRequest, Middleware } from '@presentation/protocols';
+import { z } from 'zod';
+
+@validator
+export class {{ pascalCase name }}Validator implements Middleware {
+	private readonly schema = z.object({
+		
+	});
+
+	async handle(httpRequest: HttpRequest): Promise<void> {
+		const parsed = await this.schema.parseAsync(httpRequest);
+		Object.assign(httpRequest, parsed);
+	}
+}

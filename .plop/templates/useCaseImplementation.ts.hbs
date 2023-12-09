@@ -1,0 +1,11 @@
+import { injectable } from "@container";
+import { {{ pascalCase name }} } from "@domain/use-cases/{{ generatePath module }}";
+
+@injectable()
+export class Db{{pascalCase name}} implements {{pascalCase name}} {
+	constructor() {}
+
+  async {{camelCase methodName}}(): Promise<void> {
+    // ...
+  }
+}

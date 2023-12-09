@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"target": "ES2017",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"module": "CommonJS",
+		"rootDir": "./src",
+		"baseUrl": ".",
+		"paths": {
+			"@main/*": ["src/main/*"],
+			"@presentation/*": ["src/presentation/*"],
+			"@infra/*": ["src/infra/*"],
+			"@domain/*": ["src/domain/*"],
+			"@data/*": ["src/data/*"],
+			"@container": ["src/main/container/index"],
+			"@container/*": ["src/main/container/*"],
+			"@helpers": ["src/helpers/index.ts"]
+		},
+		"outDir": "./dist",
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"skipDefaultLibCheck": true,
+		"skipLibCheck": true
+	},
+	"include": ["**/*.ts"],
+	"exclude": ["node_modules"]
+}
