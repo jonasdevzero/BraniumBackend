@@ -4,9 +4,14 @@
 		"decrypter",
 		"Decrypter",
 		"injectables",
+		"kysely",
+		"ossp",
+		"plopfile",
 		"presigner",
 		"pretier",
 		"sendgrid",
-		"SENDGRID"
+		"SENDGRID",
+		"tsnd",
+		"usecase"
 	]
 }
