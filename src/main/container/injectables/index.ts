@@ -1,7 +1,6 @@
 import * as middlewares from '@presentation/middlewares';
 import useCases from './use-cases';
-import repositories from './repositories';
-import * as mail from '@infra/mail';
+// import repositories from './repositories';
 import * as authentication from '@infra/authentication';
 import * as storage from '@infra/storage';
 
@@ -9,12 +8,11 @@ import * as storage from '@infra/storage';
 const injectables = {
 	...authentication,
 	...storage,
-	...mail,
-	...repositories,
+	// ...repositories,
 };
 
 export type Middlewares = keyof typeof middlewares;
 export type Injectable = keyof typeof injectables;
-export type UseCase = keyof typeof useCases;
+export type UseCase = keyof {};
 
-export default { ...injectables, ...middlewares, ...useCases };
+export default { ...injectables, ...middlewares };
