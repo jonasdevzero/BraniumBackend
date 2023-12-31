@@ -3,7 +3,7 @@ version: '3.9'
 services:
   database:
     image: postgres
-    container_name: branium
+    container_name: branium-messages
     ports:
       - '${POSTGRES_PORT}:5432'
     environment:
