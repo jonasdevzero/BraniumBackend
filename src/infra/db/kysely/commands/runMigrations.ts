@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { db } from '../connection';
 import { makeMigrator } from '../helpers/makeMigrator';
-import { setupDatabase } from '@infra/db/pg/helpers/setupDatabase';
+import { setupDatabase } from '@infra/db/kysely/helpers/setupDatabase';
 
 async function migrateToLatest() {
 	await setupDatabase();
