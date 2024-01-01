@@ -7,30 +7,14 @@ const envSchema = z
 
 		PORT: z.string().default('8080').transform(Number),
 
+		PRIVATE_KEY: z.string().default('ssl/key.pem'),
+		CERTIFICATE: z.string().default('ssl/cert.pem'),
+		CA: z.string().default('ssl/ca-cert.pem'),
+
 		DATABASE_URL: z.string(),
 		POSTGRES_PORT: z.string().default('5432').transform(Number),
 		POSTGRES_USER: z.string().default('docker'),
 		POSTGRES_PASSWORD: z.string().default('docker'),
-
-		JWT_SECRET: z.string(),
-		JWT_EXPIRES_IN: z.string().default('15days'),
-		JWT_REFRESH_EXPIRES_IN: z.string().default('30days'),
-
-		BASIC_USER: z.string().default('foo'),
-		BASIC_PASS: z.string().default('bar'),
-
-		SMS_DRIVER: z.enum(['fake']).default('fake'),
-		MAIL_DRIVER: z.enum(['fake', 'smtp', 'sendgrid']).default('fake'),
-
-		MAIL_SMTP_EMAIL_FROM: z.string().optional(),
-		MAIL_SMTP_USER_FROM: z.string().optional(),
-		MAIL_SMTP_HOST: z.string().optional(),
-		MAIL_SMTP_PORT: z.string().optional().transform(Number),
-		MAIL_SMTP_SSL: z.string().optional(),
-		MAIL_SMTP_USERNAME: z.string().optional(),
-		MAIL_SMTP_PASSWORD: z.string().optional(),
-
-		MAIL_SENDGRID_API_KEY: z.string().optional(),
 
 		STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
 

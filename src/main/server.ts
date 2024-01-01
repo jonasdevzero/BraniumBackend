@@ -1,13 +1,19 @@
 import 'dotenv/config';
 import https from 'node:https';
+import fs from 'node:fs';
 import { app } from './app';
 import { connectWS } from './websocket';
+import { ENV } from './config/env';
 
-const port = process.env.PORT ?? 4000;
+const options: https.ServerOptions = {
+	key: fs.readFileSync(ENV.PRIVATE_KEY),
+	cert: fs.readFileSync(ENV.CERTIFICATE),
+	ca: fs.readFileSync(ENV.CA),
+};
 
-const server = new https.Server({}, app);
+const server = new https.Server(options, app);
 connectWS(server);
 
-server.listen(port, () => {
-	console.log(`Server running at http://localhost:${port}`);
+server.listen(ENV.PORT, () => {
+	console.log(`Server running at https://localhost:${ENV.PORT}`);
 });

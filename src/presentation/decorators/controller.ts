@@ -12,7 +12,7 @@ type Class<T> = { new (...args: any[]): T };
 
 export function controller() {
 	return function decorator<T extends Class<Controller>>(
-		constructor: T,
+		constructor: T
 	): T | void {
 		let middlewares: Middleware[] =
 			(constructor as any)[kControllerMiddlewares] || [];

@@ -1,3 +1,3 @@
 export const routeModules = {
-	user: '/user',
+	profile: '/profile',
 };

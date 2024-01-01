@@ -267,3 +267,5 @@ temp/*
 !temp/uploads
 temp/uploads/*
 !temp/uploads/.gitkeep
+
+ssl/**/*.pem
