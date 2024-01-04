@@ -17,6 +17,7 @@ const envSchema = z
 		POSTGRES_PASSWORD: z.string().default('docker'),
 
 		STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
+		BASE_STORAGE_URL: z.string(),
 
 		STORAGE_BUCKET_NAME: z.string().optional(),
 		STORAGE_REGION: z.string().optional().default('us-west-1'),
