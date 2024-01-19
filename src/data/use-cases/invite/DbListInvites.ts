@@ -1,7 +1,6 @@
 import { inject, injectable } from '@container';
 import { GetFileUrlProvider, ListInvitesRepository } from '@data/protocols';
-import { ListInvitesDTO } from '@domain/dtos/invite';
-import { LoadedInvite } from '@domain/models';
+import { ListInvitesDTO, ListInvitesResultDTO } from '@domain/dtos/invite';
 import { ListInvites } from '@domain/use-cases/invite';
 
 @injectable()
@@ -14,11 +13,11 @@ export class DbListInvites implements ListInvites {
 		private readonly getFileUrlProvider: GetFileUrlProvider
 	) {}
 
-	async list(data: ListInvitesDTO): Promise<LoadedInvite[]> {
+	async list(data: ListInvitesDTO): Promise<ListInvitesResultDTO> {
 		const invites = await this.listInvitesRepository.list(data);
 
 		await Promise.all(
-			invites.map(async (invite) => {
+			invites.content.map(async (invite) => {
 				if (!invite.sender.image) return;
 
 				const url = await this.getFileUrlProvider.get(invite.sender.image);

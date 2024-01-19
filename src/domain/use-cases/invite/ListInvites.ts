@@ -1,6 +1,5 @@
-import { ListInvitesDTO } from '@domain/dtos/invite';
-import { LoadedInvite } from '@domain/models';
+import { ListInvitesDTO, ListInvitesResultDTO } from '@domain/dtos/invite';
 
 export interface ListInvites {
-	list(data: ListInvitesDTO): Promise<LoadedInvite[]>;
+	list(data: ListInvitesDTO): Promise<ListInvitesResultDTO>;
 }
