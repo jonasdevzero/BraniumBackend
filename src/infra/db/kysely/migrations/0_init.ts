@@ -24,20 +24,19 @@ export async function up(db: Kysely<Database>): Promise<void> {
 		.addColumn('senderId', 'uuid', (col) => col.notNull())
 		.addColumn('receiverId', 'uuid', (col) => col.notNull())
 		.addColumn('message', 'text')
-		.addColumn('pending', 'boolean', (col) => col.defaultTo(true))
 		.addForeignKeyConstraint(
 			'fk_invite_sender',
 			['senderId'],
 			'profile',
 			['id'],
-			(cb) => cb.onUpdate('cascade')
+			(cb) => cb.onUpdate('cascade').onDelete('cascade')
 		)
 		.addForeignKeyConstraint(
 			'fk_invite_receiver',
 			['receiverId'],
 			'profile',
 			['id'],
-			(cb) => cb.onUpdate('cascade')
+			(cb) => cb.onUpdate('cascade').onDelete('cascade')
 		)
 		.execute();
 
@@ -57,14 +56,14 @@ export async function up(db: Kysely<Database>): Promise<void> {
 			['userId'],
 			'profile',
 			['id'],
-			(cb) => cb.onUpdate('cascade')
+			(cb) => cb.onUpdate('cascade').onDelete('cascade')
 		)
 		.addForeignKeyConstraint(
 			'fk_contact_contact',
 			['contactId'],
 			'profile',
 			['id'],
-			(cb) => cb.onUpdate('cascade')
+			(cb) => cb.onUpdate('cascade').onDelete('cascade')
 		)
 		.execute();
 }
