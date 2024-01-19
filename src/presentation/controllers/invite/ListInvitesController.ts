@@ -4,6 +4,7 @@ import { Controller, HttpRequest, HttpResponse } from '@presentation/protocols';
 import { ListInvites } from '@domain/use-cases/invite';
 import { ListInvitesValidator } from '@presentation/validators/invite';
 import { response } from '@presentation/helpers';
+import { ListInvitesDTO } from '@domain/dtos/invite';
 
 @controller()
 @middlewares(ListInvitesValidator)
@@ -16,7 +17,7 @@ export class ListInvitesController implements Controller {
 
 	async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
 		const { profileId } = httpRequest.params;
-		const data = httpRequest.query;
+		const data = httpRequest.query as ListInvitesDTO;
 
 		Object.assign(data, { profileId });
 
