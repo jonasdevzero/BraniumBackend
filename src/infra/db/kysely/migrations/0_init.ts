@@ -24,6 +24,9 @@ export async function up(db: Kysely<Database>): Promise<void> {
 		.addColumn('senderId', 'uuid', (col) => col.notNull())
 		.addColumn('receiverId', 'uuid', (col) => col.notNull())
 		.addColumn('message', 'text')
+		.addColumn('createdAt', 'timestamp', (col) =>
+			col.defaultTo(sql`now()`).notNull()
+		)
 		.addForeignKeyConstraint(
 			'fk_invite_sender',
 			['senderId'],
