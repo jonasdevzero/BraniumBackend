@@ -16,8 +16,61 @@ export async function up(db: Kysely<Database>): Promise<void> {
 			col.defaultTo(sql`now()`).notNull()
 		)
 		.execute();
+
+	await db.schema
+		.createTable('invite')
+		.ifNotExists()
+		.addColumn('id', 'uuid', (col) => col.primaryKey())
+		.addColumn('senderId', 'uuid', (col) => col.notNull())
+		.addColumn('receiverId', 'uuid', (col) => col.notNull())
+		.addColumn('message', 'text')
+		.addColumn('pending', 'boolean', (col) => col.defaultTo(true))
+		.addForeignKeyConstraint(
+			'fk_invite_sender',
+			['senderId'],
+			'profile',
+			['id'],
+			(cb) => cb.onUpdate('cascade')
+		)
+		.addForeignKeyConstraint(
+			'fk_invite_receiver',
+			['receiverId'],
+			'profile',
+			['id'],
+			(cb) => cb.onUpdate('cascade')
+		)
+		.execute();
+
+	await db.schema
+		.createTable('contact')
+		.ifNotExists()
+		.addColumn('userId', 'uuid', (col) => col.notNull())
+		.addColumn('contactId', 'uuid', (col) => col.notNull())
+		.addColumn('name', 'text')
+		.addColumn('blocked', 'boolean', (col) => col.notNull().defaultTo(false))
+		.addColumn('createdAt', 'timestamp', (col) =>
+			col.notNull().defaultTo(sql`now()`)
+		)
+		.addPrimaryKeyConstraint('pk_contact', ['userId', 'contactId'])
+		.addForeignKeyConstraint(
+			'fk_contact_user',
+			['userId'],
+			'profile',
+			['id'],
+			(cb) => cb.onUpdate('cascade')
+		)
+		.addForeignKeyConstraint(
+			'fk_contact_contact',
+			['contactId'],
+			'profile',
+			['id'],
+			(cb) => cb.onUpdate('cascade')
+		)
+		.execute();
 }
 
 export async function down(db: Kysely<Database>): Promise<void> {
+	await db.schema.dropTable('invite').ifExists().execute();
+	await db.schema.dropTable('contact').ifExists().execute();
 	await db.schema.dropTable('profile').ifExists().execute();
 }
