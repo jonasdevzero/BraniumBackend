@@ -7,38 +7,59 @@ import type { Duplex } from 'node:stream';
 import { kRooms, kSocketEvents, kSocketRooms } from './config';
 import { constructFrame, parseFrame } from './helpers/frame';
 import { Socket } from './socket';
+import { authenticateConnection } from './authentication';
 
 export class WebsocketServerHttpAdapter implements WebSocketServer {
 	#event = new Event();
 	#users = new Map();
 	[kRooms] = new Map();
 
-	constructor(server: http.Server) {
-		this.#initialize(server);
-	}
-
-	#initialize(server: http.Server) {
-		server.on('upgrade', (req, socket) => {
+	initialize(server: http.Server) {
+		server.on('upgrade', async (req, socket) => {
 			if (req.headers['upgrade'] !== 'websocket') {
 				socket.end('HTTP/1.1 400 Bad Request');
 				return;
 			}
 
-			const headers = this.#authHandshake(req, socket);
-			if (!headers) return;
+			const auth = await this.#authHandshake(req, socket);
+			if (!auth) return;
+
+			const { headers, userId } = auth;
 
 			socket.write(headers);
-			this.#onConnection(socket);
+			this.#onConnection(socket, userId);
 		});
 	}
 
-	#authHandshake(req: http.IncomingMessage, socket: Duplex) {
+	async #authHandshake(req: http.IncomingMessage, socket: Duplex) {
 		const protocol = req.headers['sec-websocket-protocol']?.split(', ')[0];
 		const version = Number(req.headers['sec-websocket-version']) ?? 0;
 		const key = req.headers['sec-websocket-key'];
 
 		if (version < 13 || protocol !== 'chat') {
 			socket.end('HTTP/1.1 400 Bad Request');
+			return;
+		}
+
+		const cookie = req.headers['cookie'];
+
+		if (!cookie) {
+			socket.end('HTTP/1.1 401 Cookie header is required');
+			return;
+		}
+
+		const cookies = cookie.split('; ').map((c) => c.split('='));
+		const access = cookies.find(([name]) => name === 'access');
+
+		if (!access) {
+			socket.end('HTTP/1.1 401 Unauthorized');
+			return;
+		}
+
+		const userId = await authenticateConnection(access[1]);
+
+		if (!userId) {
+			socket.end('HTTP/1.1 401 Unauthorized');
 			return;
 		}
 
@@ -58,11 +79,11 @@ export class WebsocketServerHttpAdapter implements WebSocketServer {
 			.map((line) => line.concat('\r\n'))
 			.join('');
 
-		return headers;
+		return { headers, userId };
 	}
 
-	#onConnection(rawSocket: Duplex) {
-		const socket = new Socket(rawSocket, this);
+	#onConnection(rawSocket: Duplex, userId: string) {
+		const socket = new Socket(rawSocket, this, userId);
 
 		rawSocket.on('data', this.#onSocketData(socket));
 		rawSocket.on('error', this.#onSocketError(socket));

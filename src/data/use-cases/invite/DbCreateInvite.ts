@@ -3,6 +3,7 @@ import {
 	CreateInviteRepository,
 	ExistsInviteRepository,
 	ExistsProfileRepository,
+	WebSocketServer,
 } from '@data/protocols';
 import { ExistsContactRepository } from '@data/protocols/db/contact';
 import { CreateInviteDTO } from '@domain/dtos/invite';
@@ -22,7 +23,10 @@ export class DbCreateInvite implements CreateInvite {
 		private readonly existsContactRepository: ExistsContactRepository,
 
 		@inject('CreateInviteRepository')
-		private readonly createInviteRepository: CreateInviteRepository
+		private readonly createInviteRepository: CreateInviteRepository,
+
+		@inject('WebSocketServer')
+		private readonly ws: WebSocketServer
 	) {}
 
 	async create(data: CreateInviteDTO): Promise<void> {
@@ -68,6 +72,8 @@ export class DbCreateInvite implements CreateInvite {
 			throw new BadRequestError('Contact already exists');
 		}
 
-		await this.createInviteRepository.create(data);
+		const invite = await this.createInviteRepository.create(data);
+
+		this.ws.emit([receiverId], 'invite:new', invite);
 	}
 }

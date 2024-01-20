@@ -3,8 +3,11 @@ import {
 	CreateContactRepository,
 	DeleteInviteRepository,
 	FindInviteByIdRepository,
+	LoadContactRepository,
+	WebSocketServer,
 } from '@data/protocols';
 import { ResponseInviteDTO } from '@domain/dtos/invite';
+import { Invite } from '@domain/models';
 import { ResponseInvite } from '@domain/use-cases/invite';
 import { NotAuthorizedError, NotFoundError } from '@presentation/errors';
 
@@ -18,7 +21,13 @@ export class DbResponseInvite implements ResponseInvite {
 		private readonly deleteInviteRepository: DeleteInviteRepository,
 
 		@inject('CreateContactRepository')
-		private readonly createContactRepository: CreateContactRepository
+		private readonly createContactRepository: CreateContactRepository,
+
+		@inject('LoadContactRepository')
+		private readonly loadContactRepository: LoadContactRepository,
+
+		@inject('WebSocketServer')
+		private readonly ws: WebSocketServer
 	) {}
 
 	async response(data: ResponseInviteDTO): Promise<void> {
@@ -46,5 +55,21 @@ export class DbResponseInvite implements ResponseInvite {
 			]),
 			this.deleteInviteRepository.delete(inviteId),
 		]);
+
+		this.emitNewContact(invite);
+	}
+
+	private emitNewContact(invite: Invite) {
+		this.loadContactRepository
+			.load({
+				userId: invite.receiverId,
+				contactId: invite.senderId,
+			})
+			.then((contact) => {
+				if (!contact) return;
+
+				this.ws.emit([invite.receiverId], 'contact:new', contact);
+			})
+			.catch(() => null);
 	}
 }

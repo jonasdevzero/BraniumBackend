@@ -8,13 +8,14 @@ import { WebsocketServerHttpAdapter } from './server';
 export class Socket implements WebSocket {
 	#server;
 	raw: Duplex;
-	id = randomUUID();
+	id: string;
 	[kSocketEvents] = new Map();
 	[kSocketRooms]: string[] = [];
 
-	constructor(raw: Duplex, server: WebsocketServerHttpAdapter) {
+	constructor(raw: Duplex, server: WebsocketServerHttpAdapter, id: string) {
 		this.raw = raw;
 		this.#server = server;
+		this.id = id;
 	}
 
 	on(event: string, fn: SocketFn) {

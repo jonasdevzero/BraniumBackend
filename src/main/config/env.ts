@@ -25,6 +25,8 @@ const envSchema = z
 		STORAGE_PUBLIC_ENDPOINT: z.string().optional(),
 		STORAGE_ACCESS_KEY_ID: z.string().optional(),
 		STORAGE_SECRET_ACCESS_KEY: z.string().optional(),
+
+		AUTHENTICATION_URL: z.string().url(),
 	})
 	.superRefine((schema, context) => {
 		if (schema.STORAGE_DRIVER === 'local') return;

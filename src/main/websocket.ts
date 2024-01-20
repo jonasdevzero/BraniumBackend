@@ -1,24 +1,24 @@
 import type { Server } from 'node:http';
-import { WebSocketServer } from '@infra/websocket';
+import { WebSocketServer } from '@data/protocols';
 import { WebSocket } from '@domain/models';
+import { container } from './container';
 
 export function connectWS(server: Server) {
-	const ws = new WebSocketServer(server);
+	const ws = container.get<WebSocketServer>('WebSocketServer');
 
-	ws.on('connection', onConnection(ws));
+	if (!ws) {
+		throw new Error('WebSocket Server not injected');
+	}
+
+	ws.initialize(server);
+
+	ws.on('connection', onConnection());
 }
 
-function onConnection(ws: WebSocketServer) {
+function onConnection() {
 	return (socket: WebSocket) => {
-		socket.join('global');
-		socket.emit('connect', socket.id);
+		socket.join(socket.id);
 
-		socket.on('message', (message) => {
-			ws.emit(['global'], 'message', message);
-		});
-
-		socket.on('disconnect', () => {
-			// ...
-		});
+		socket.on('disconnect', () => socket.leave(socket.id));
 	};
 }
