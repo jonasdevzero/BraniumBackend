@@ -6,7 +6,7 @@ export class EditProfilePostgresRepository implements EditProfileRepository {
 	async edit(data: EditProfileDTO): Promise<void> {
 		const { profileId, ...rest } = data;
 
-		const hasData = Object.values(rest).some((v) => !!v);
+		const hasData = Object.values(rest).some((v) => typeof v !== 'undefined');
 		if (!hasData) return;
 
 		await sql`UPDATE public.profile SET ${sql(rest)} WHERE id = ${profileId}`;
