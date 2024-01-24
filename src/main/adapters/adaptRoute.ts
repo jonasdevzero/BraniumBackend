@@ -28,7 +28,7 @@ export const adaptRoute = (controller: Controller) => {
 			try {
 				const multipart = await adaptUpload(
 					request,
-					controller as UploadController,
+					controller as UploadController
 				);
 
 				Object.assign(httpRequest, {

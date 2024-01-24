@@ -34,7 +34,7 @@ export class ListProfilesPostgresRepository implements ListProfilesRepository {
 					AND left_invite.id IS NULL
 					${
 						typeof search === 'string'
-							? sql`AND profile.username ILIKE ${search}`
+							? sql`AND profile.username ILIKE ${`%${search}%`}`
 							: sql``
 					}
 				LIMIT ${limit}
@@ -58,7 +58,7 @@ export class ListProfilesPostgresRepository implements ListProfilesRepository {
 					AND left_invite.id IS NULL
 					${
 						typeof search === 'string'
-							? sql`AND profile.username ILIKE ${search}`
+							? sql`AND profile.username ILIKE ${`%${search}%`}`
 							: sql``
 					}
 			`,
