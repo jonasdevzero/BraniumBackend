@@ -151,6 +151,8 @@ export class WebsocketServerHttpAdapter implements WebSocketServer {
 	#broadCast(target: string, data: Uint8Array) {
 		const room = this[kRooms].get(target);
 
+		if (!room || !room.length) return;
+
 		for (const [_, user] of room) {
 			user.raw.write(data);
 		}

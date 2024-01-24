@@ -7,3 +7,5 @@ export * from './FindProfileByIdPostgresRepository';
 export * from './EditProfilePostgresRepository';
 
 export * from './ExistsProfilePostgresRepository';
+
+export * from './ListProfilesPostgresRepository';

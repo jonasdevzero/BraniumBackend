@@ -21,7 +21,7 @@ export class CreateInvitePostgresRepository implements CreateInviteRepository {
 				sender.image AS sender_image,
 				inserted."createdAt"
 			FROM inserted
-			LEFT JOIN LEFT JOIN public.profile AS sender
+			LEFT JOIN public.profile AS sender
 				ON sender.id = inserted."senderId"
 		`;
 

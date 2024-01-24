@@ -7,3 +7,5 @@ export * from './FindProfileByIdRepository';
 export * from './EditProfileRepository';
 
 export * from './ExistsProfileRepository';
+
+export * from './ListProfilesRepository';
