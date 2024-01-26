@@ -11,7 +11,6 @@ import { authenticateConnection } from './authentication';
 
 export class WebsocketServerHttpAdapter implements WebSocketServer {
 	#event = new Event();
-	#users = new Map();
 	[kRooms] = new Map();
 
 	initialize(server: http.Server) {
@@ -126,7 +125,6 @@ export class WebsocketServerHttpAdapter implements WebSocketServer {
 
 	#onSocketEnd(socket: Socket) {
 		return () => {
-			this.#users.delete(socket.id);
 			this.#execEvent(socket, 'disconnect');
 			this.#socketExitRooms(socket);
 			socket.raw.end();
@@ -149,9 +147,9 @@ export class WebsocketServerHttpAdapter implements WebSocketServer {
 	}
 
 	#broadCast(target: string, data: Uint8Array) {
-		const room = this[kRooms].get(target);
+		const room: Map<string, Socket> = this[kRooms].get(target);
 
-		if (!room || !room.length) return;
+		if (!room || !room.size) return;
 
 		for (const [_, user] of room) {
 			user.raw.write(data);
@@ -165,9 +163,6 @@ export class WebsocketServerHttpAdapter implements WebSocketServer {
 	emit(to: string[], event: string, ...args: unknown[]): void {
 		const data = constructFrame({ event, message: args });
 
-		for (const target of to) {
-			const user = this.#users.get(target);
-			user ? user.raw.write(data) : this.#broadCast(target, data);
-		}
+		for (const target of to) this.#broadCast(target, data);
 	}
 }

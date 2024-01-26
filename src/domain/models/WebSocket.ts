@@ -1,5 +1,6 @@
 export interface WebSocket {
 	id: string;
+	sessionId: string;
 
 	on(event: string, fn: SocketFn): void;
 	once(event: string, fn: SocketFn): void;

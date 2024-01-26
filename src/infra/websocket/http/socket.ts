@@ -1,14 +1,15 @@
 import { SocketFn, WebSocket } from '@domain/models';
-import { randomUUID } from 'node:crypto';
 import { Duplex } from 'node:stream';
 import { kRooms, kSocketEvents, kSocketRooms } from './config';
 import { constructFrame } from './helpers/frame';
 import { WebsocketServerHttpAdapter } from './server';
+import { randomUUID } from 'node:crypto';
 
 export class Socket implements WebSocket {
 	#server;
 	raw: Duplex;
 	id: string;
+	sessionId = randomUUID();
 	[kSocketEvents] = new Map();
 	[kSocketRooms]: string[] = [];
 
@@ -51,7 +52,7 @@ export class Socket implements WebSocket {
 
 	join(room: string) {
 		const usersOnRoom = this.#server[kRooms].get(room) ?? new Map();
-		usersOnRoom.set(this.id, this);
+		usersOnRoom.set(this.sessionId, this);
 		this.#server[kRooms].set(room, usersOnRoom);
 
 		this[kSocketRooms].filter((r) => r !== room).push(room);
@@ -61,7 +62,7 @@ export class Socket implements WebSocket {
 
 	leave(room: string) {
 		const usersOnRoom = this.#server[kRooms].get(room);
-		usersOnRoom ? usersOnRoom.delete(this.id) : null;
+		usersOnRoom ? usersOnRoom.delete(this.sessionId) : null;
 		this.#server[kRooms].set(room, usersOnRoom);
 
 		this[kSocketRooms].filter((r) => r !== room);
