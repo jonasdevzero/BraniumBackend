@@ -20,7 +20,7 @@ interface CountRow {
 
 export class ListInvitesPostgresRepository implements ListInvitesRepository {
 	async list(data: ListInvitesDTO): Promise<ListInvitesResultDTO> {
-		const { profileId, page, limit } = data;
+		const { profileId, page, limit, search } = data;
 
 		const offset = page * limit;
 
@@ -37,14 +37,26 @@ export class ListInvitesPostgresRepository implements ListInvitesRepository {
 				LEFT JOIN public.profile AS sender
 					ON sender.id = invite."senderId"
 				WHERE invite."receiverId" = ${profileId}
+				${
+					typeof search === 'string'
+						? sql`AND sender.username ILIKE ${`%${search}%`}`
+						: sql``
+				}
 				ORDER BY invite."createdAt" DESC
 				LIMIT ${limit}
 				OFFSET ${offset}
 			`,
 			sql<CountRow[]>`
-				SELECT COUNT(DISTINCT id) AS count
-				FROM public.invite
-				WHERE "receiverId" = ${profileId}
+				SELECT COUNT(DISTINCT invite.id) AS count
+				FROM public.invite AS invite
+				LEFT JOIN public.profile AS sender
+					ON sender.id = invite."senderId"
+				WHERE invite."receiverId" = ${profileId}
+				${
+					typeof search === 'string'
+						? sql`AND sender.username ILIKE ${`%${search}%`}`
+						: sql``
+				}
 			`,
 		]);
 
