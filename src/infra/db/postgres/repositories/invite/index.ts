@@ -7,3 +7,5 @@ export * from './ListInvitesPostgresRepository';
 export * from './FindInviteByIdPostgresRepository';
 
 export * from './DeleteInvitePostgresRepository';
+
+export * from './CountInvitesPostgresRepository';
