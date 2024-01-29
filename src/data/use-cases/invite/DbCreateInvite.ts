@@ -3,6 +3,7 @@ import {
 	CreateInviteRepository,
 	ExistsInviteRepository,
 	ExistsProfileRepository,
+	GetFileUrlProvider,
 	WebSocketServer,
 } from '@data/protocols';
 import { ExistsContactRepository } from '@data/protocols/db/contact';
@@ -24,6 +25,9 @@ export class DbCreateInvite implements CreateInvite {
 
 		@inject('CreateInviteRepository')
 		private readonly createInviteRepository: CreateInviteRepository,
+
+		@inject('GetFileUrlProvider')
+		private readonly getFileUrlProvider: GetFileUrlProvider,
 
 		@inject('WebSocketServer')
 		private readonly ws: WebSocketServer
@@ -73,6 +77,11 @@ export class DbCreateInvite implements CreateInvite {
 		}
 
 		const invite = await this.createInviteRepository.create(data);
+
+		if (invite.sender.image) {
+			const url = await this.getFileUrlProvider.get(invite.sender.image);
+			Object.assign(invite.sender, { image: url });
+		}
 
 		this.ws.emit([receiverId], 'invite:new', invite);
 	}

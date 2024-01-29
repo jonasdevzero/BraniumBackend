@@ -4,11 +4,22 @@ import { sql } from '../../connection';
 import { randomUUID } from 'crypto';
 import { LoadedInvite } from '@domain/models';
 
+interface Row {
+	id: string;
+	message?: string | null;
+
+	sender_name: string;
+	sender_username: string;
+	sender_image?: string | null;
+
+	createdAt: Date;
+}
+
 export class CreateInvitePostgresRepository implements CreateInviteRepository {
 	async create(data: CreateInviteDTO): Promise<LoadedInvite> {
 		const values = { ...data, id: randomUUID() };
 
-		const [invite] = await sql<LoadedInvite[]>`
+		const [row] = await sql<Row[]>`
 			WITH inserted AS (
 				INSERT INTO public.invite ${sql(values)}
 				RETURNING *
@@ -25,6 +36,15 @@ export class CreateInvitePostgresRepository implements CreateInviteRepository {
 				ON sender.id = inserted."senderId"
 		`;
 
-		return invite;
+		const { sender_name, sender_username, sender_image, ...rest } = row;
+
+		return {
+			...rest,
+			sender: {
+				name: sender_name,
+				username: sender_username,
+				image: sender_image,
+			},
+		};
 	}
 }
