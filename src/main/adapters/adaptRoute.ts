@@ -38,14 +38,14 @@ export const adaptRoute = (controller: Controller) => {
 				tempFiles = multipart.uploadedFiles;
 			} catch (error) {
 				const httpResponse = responseUtil.error(error as Error);
-				return response.status(httpResponse.statusCode).send(httpResponse.body);
+				return response.status(httpResponse.statusCode).json(httpResponse.body);
 			}
 		}
 
 		const httpResponse = await controller.handle(httpRequest);
 
 		response.status(httpResponse.statusCode);
-		response.send(httpResponse.body);
+		response.json(httpResponse.body);
 
 		await Promise.all(tempFiles.map((file) => deleteFile(file.location)));
 	};
