@@ -3,11 +3,10 @@ import {
 	CreateContactRepository,
 	DeleteInviteRepository,
 	FindInviteByIdRepository,
-	LoadContactRepository,
+	GetFileUrlProvider,
 	WebSocketServer,
 } from '@data/protocols';
 import { ResponseInviteDTO } from '@domain/dtos/invite';
-import { Invite } from '@domain/models';
 import { ResponseInvite } from '@domain/use-cases/invite';
 import { NotAuthorizedError, NotFoundError } from '@presentation/errors';
 
@@ -23,8 +22,8 @@ export class DbResponseInvite implements ResponseInvite {
 		@inject('CreateContactRepository')
 		private readonly createContactRepository: CreateContactRepository,
 
-		@inject('LoadContactRepository')
-		private readonly loadContactRepository: LoadContactRepository,
+		@inject('GetFileUrlProvider')
+		private readonly getFileUrlProvider: GetFileUrlProvider,
 
 		@inject('WebSocketServer')
 		private readonly ws: WebSocketServer
@@ -48,7 +47,7 @@ export class DbResponseInvite implements ResponseInvite {
 			return;
 		}
 
-		await Promise.all([
+		const [contacts] = await Promise.all([
 			this.createContactRepository.create([
 				{ userId: invite.senderId, contactId: invite.receiverId },
 				{ userId: invite.receiverId, contactId: invite.senderId },
@@ -56,20 +55,18 @@ export class DbResponseInvite implements ResponseInvite {
 			this.deleteInviteRepository.delete(inviteId),
 		]);
 
-		this.emitNewContact(invite);
-	}
+		await Promise.all(
+			contacts.map(async (contact) => {
+				if (contact.image) {
+					const url = await this.getFileUrlProvider.get(contact.image);
+					Object.assign(contact, { image: url });
+				}
 
-	private emitNewContact(invite: Invite) {
-		this.loadContactRepository
-			.load({
-				userId: invite.receiverId,
-				contactId: invite.senderId,
-			})
-			.then((contact) => {
-				if (!contact) return;
+				const to =
+					invite.senderId === contact.id ? invite.receiverId : invite.senderId;
 
-				this.ws.emit([invite.receiverId], 'contact:new', contact);
+				this.ws.emit([to], 'contact:new', contact);
 			})
-			.catch(() => null);
+		);
 	}
 }
