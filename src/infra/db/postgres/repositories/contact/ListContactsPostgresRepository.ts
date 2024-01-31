@@ -33,7 +33,7 @@ export class ListContactsPostgresRepository implements ListContactsRepository {
 				WHERE contact."userId" = ${profileId}
 					${
 						typeof search === 'string'
-							? sql`AND (contact_profile.name ILIKE '%${search}%' OR contact_profile.username ILIKE '%${search}%')`
+							? sql`AND (contact_profile.name ILIKE ${`%${search}%`} OR contact_profile.username ILIKE ${`%${search}%`})`
 							: sql``
 					}
 				ORDER BY contact."createdAt" DESC
@@ -51,7 +51,7 @@ export class ListContactsPostgresRepository implements ListContactsRepository {
 				WHERE contact."userId" = ${profileId}
 				${
 					typeof search === 'string'
-						? sql`AND (contact_profile.name ILIKE '%${search}%' OR contact_profile.username ILIKE '%${search}%')`
+						? sql`AND (contact_profile.name ILIKE ${`%${search}%`} OR contact_profile.username ILIKE ${`%${search}%`})`
 						: sql``
 				}
 			`,
