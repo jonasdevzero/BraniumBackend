@@ -18,8 +18,6 @@ export class CreateContactMessageValidator implements Middleware {
 					key: z.string(),
 				}),
 
-				replyId: z.string().uuid().optional(),
-
 				message: z.string().optional(),
 				type: z.enum(messageType),
 
