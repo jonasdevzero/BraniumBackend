@@ -11,6 +11,7 @@ export interface UploadOptions {
 	/** Bytes */
 	sizeLimit?: number;
 	mimeTypes?: string[];
+	nested?: boolean;
 }
 
 export interface UploadResult {

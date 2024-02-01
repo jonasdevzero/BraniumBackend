@@ -11,10 +11,10 @@ import { deleteFile } from '@helpers';
 type Class<T> = { new (...args: any[]): T };
 
 export function upload(options: UploadOptions = {}) {
-	const { mimeTypes: allowedTypes } = options;
+	const { mimeTypes: allowedTypes, nested } = options;
 
 	return function decorator<T extends Class<Controller>>(
-		constructor: T,
+		constructor: T
 	): T | void {
 		return class extends constructor {
 			constructor(...args: any[]) {
@@ -38,6 +38,11 @@ export function upload(options: UploadOptions = {}) {
 				try {
 					await new Promise<unknown>(async (resolve, reject) => {
 						bb.on('field', (name, value) => {
+							if (nested) {
+								setNestedProperty(data, name, value);
+								return;
+							}
+
 							data[name] = data[name] ? [data[name], value] : value;
 						});
 
@@ -46,7 +51,7 @@ export function upload(options: UploadOptions = {}) {
 
 							if (allowedTypes && !allowedTypes.includes(mimeType)) {
 								reject(
-									new BadRequestError(`Mimetype not allowed: ${mimeType}`),
+									new BadRequestError(`Mimetype not allowed: ${mimeType}`)
 								);
 								return;
 							}
@@ -54,6 +59,8 @@ export function upload(options: UploadOptions = {}) {
 							const filename = `${Date.now()}-${info.filename}`;
 							const location = path.join(uploadConfig.folder, filename);
 							const fileData = { filename, location, mimetype: mimeType };
+
+							if (nested) setNestedProperty(data, name, fileData);
 
 							files[name]
 								? files[name].push(fileData)
@@ -89,4 +96,27 @@ export function upload(options: UploadOptions = {}) {
 			}
 		};
 	};
+}
+
+function setNestedProperty(
+	obj: Record<string, unknown>,
+	path: string,
+	value: any
+): void {
+	const keys = path.split('.');
+	const lastKey = keys.pop()!;
+	let current = obj;
+
+	keys.forEach((key, index) => {
+		const isNextKeyIndex = !Number.isNaN(+keys[index + 1]);
+
+		const parsedKey = Number.isNaN(+key) ? key : +key;
+		const defaultValue = isNextKeyIndex ? [] : {};
+
+		current[parsedKey] = current[parsedKey] || defaultValue;
+
+		current = current[parsedKey] as Record<string, unknown>;
+	});
+
+	current[lastKey] = value;
 }
