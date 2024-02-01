@@ -1,19 +1,27 @@
 import { inject, injectable } from '@container';
 import {
 	CreateMessageRepository,
+	ExistsContactMessageRepository,
 	LoadContactRepository,
 	UploadFileProvider,
 } from '@data/protocols';
 import { CreateContactMessageDTO } from '@domain/dtos/contact';
 import { CreateMessageDTO } from '@domain/dtos/message';
 import { CreateContactMessage } from '@domain/use-cases/contact/message';
-import { BadRequestError, NotAuthorizedError } from '@presentation/errors';
+import {
+	BadRequestError,
+	NotAuthorizedError,
+	NotFoundError,
+} from '@presentation/errors';
 
 @injectable()
 export class DbCreateContactMessage implements CreateContactMessage {
 	constructor(
 		@inject('LoadContactRepository')
 		private readonly loadContactRepository: LoadContactRepository,
+
+		@inject('ExistsContactMessageRepository')
+		private readonly existsContactMessageRepository: ExistsContactMessageRepository,
 
 		@inject('UploadFileProvider')
 		private readonly uploadFileProvider: UploadFileProvider,
@@ -30,20 +38,22 @@ export class DbCreateContactMessage implements CreateContactMessage {
 	private async validateAll(data: CreateContactMessageDTO) {
 		this.validateType(data);
 		this.validateFiles(data);
-		await this.validateContact(data);
+		await Promise.all([this.validateContact(data), this.validateReply(data)]);
 	}
 
 	private validateType(data: CreateContactMessageDTO) {
-		const { type, message } = data;
+		const { type, message, files } = data;
 
 		const isNotText =
 			['TEXT', 'MIX'].includes(type) && typeof message !== 'string';
 
 		const isNotFile =
 			['FILE', 'IMAGE', 'AUDIO', 'VIDEO'].includes(type) &&
-			typeof message === 'string';
+			(typeof message === 'string' || !files.length);
 
-		if (isNotText || isNotFile) {
+		const hasNoContent = typeof message == 'undefined' && files.length === 0;
+
+		if (isNotText || isNotFile || hasNoContent) {
 			throw new BadRequestError('Invalidate message type');
 		}
 	}
@@ -105,5 +115,21 @@ export class DbCreateContactMessage implements CreateContactMessage {
 		};
 
 		await this.createMessageRepository.create(message);
+	}
+
+	private async validateReply(data: CreateContactMessageDTO) {
+		const { replyId, sender, receiver } = data;
+
+		if (!replyId) return;
+
+		const exists = await this.existsContactMessageRepository.exists({
+			messageId: replyId,
+			userId: sender.id,
+			contactId: receiver.id,
+		});
+
+		if (!exists) {
+			throw new NotFoundError('reply message');
+		}
 	}
 }

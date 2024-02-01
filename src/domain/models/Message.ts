@@ -60,7 +60,6 @@ export interface LoadedMessage {
 			id: string;
 			name: string;
 			username: string;
-			image?: string | null;
 		};
 	};
 

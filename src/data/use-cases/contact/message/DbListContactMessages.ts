@@ -32,15 +32,6 @@ export class DbListContactMessages implements ListContactMessages {
 
 						Object.assign(message.sender, { image: url });
 					})(),
-					(async () => {
-						if (!message.reply?.sender.image) return;
-
-						const url = await this.getFileUrlProvider.get(
-							message.reply?.sender.image as string
-						);
-
-						Object.assign(message.reply.sender.image, { image: url });
-					})(),
 					...message.files.map(async (file) => {
 						const url = await this.getFileUrlProvider.get(file.url);
 						Object.assign(file, { url });

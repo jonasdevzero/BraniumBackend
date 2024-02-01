@@ -33,6 +33,7 @@ export function controller() {
 
 					httpResponse = await super.handle(httpRequest);
 				} catch (error) {
+					console.error(error);
 					httpResponse = response.error(error as Error);
 				}
 

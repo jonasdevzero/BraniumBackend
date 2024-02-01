@@ -29,7 +29,6 @@ interface Row {
 	reply_sender_id: string;
 	reply_sender_name: string;
 	reply_sender_username: string;
-	reply_sender_image?: string;
 }
 
 export class ListContactMessagesPostgresRepository
@@ -63,8 +62,7 @@ export class ListContactMessagesPostgresRepository
 				reply.type AS reply_type,
 				reply_sender.id AS reply_sender_id,
 				reply_sender.name AS reply_sender_name,
-				reply_sender.username AS reply_sender_username,
-				reply_sender.image AS reply_sender_image
+				reply_sender.username AS reply_sender_username
 			FROM (
 				SELECT message_user.*
 				FROM public."messageUser" AS message_user
@@ -136,7 +134,6 @@ export class ListContactMessagesPostgresRepository
 				reply_sender_id,
 				reply_sender_name,
 				reply_sender_username,
-				reply_sender_image,
 			} = row[0];
 
 			let reply;
@@ -152,7 +149,6 @@ export class ListContactMessagesPostgresRepository
 						id: reply_sender_id,
 						name: reply_sender_name,
 						username: reply_sender_username,
-						image: reply_sender_image,
 					},
 				};
 			}
