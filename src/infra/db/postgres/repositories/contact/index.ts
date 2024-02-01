@@ -7,3 +7,5 @@ export * from './ListContactsPostgresRepository';
 export * from './EditContactPostgresRepository';
 
 export * from './LoadContactPostgresRepository';
+
+export * from './message';

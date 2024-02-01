@@ -6,6 +6,8 @@ export interface Message {
 
 	message?: string;
 	type: MessageType;
+
+	createdAt: Date;
 }
 
 export type MessageType = 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE' | 'MIX';
@@ -32,4 +34,40 @@ export interface MessageFileUser {
 	userId: string;
 
 	key: string;
+}
+
+export interface LoadedMessage {
+	id: string;
+	key: string;
+	type: MessageType;
+	message?: string | null;
+	createdAt: Date;
+
+	sender: {
+		id: string;
+		name: string;
+		username: string;
+		image?: string | null;
+	};
+
+	reply?: {
+		id: string;
+		key: string;
+		type: MessageType;
+		message?: string | null;
+
+		sender: {
+			id: string;
+			name: string;
+			username: string;
+			image?: string | null;
+		};
+	};
+
+	files: Array<{
+		id: string;
+		url: string;
+		type: MessageFileType;
+		key: string;
+	}>;
 }
