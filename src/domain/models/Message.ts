@@ -8,6 +8,7 @@ export interface Message {
 	type: MessageType;
 
 	createdAt: Date;
+	updatedAt?: Date;
 }
 
 export type MessageType = 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE' | 'MIX';

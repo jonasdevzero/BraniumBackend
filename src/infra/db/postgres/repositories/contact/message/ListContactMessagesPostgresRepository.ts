@@ -9,6 +9,7 @@ interface Row {
 	message?: string;
 	type: MessageType;
 	createdAt: Date;
+	updatedAt?: Date | null;
 
 	sender_id: string;
 	sender_name: string;
@@ -46,6 +47,7 @@ export class ListContactMessagesPostgresRepository
 				message.message,
 				message.type,
 				message."createdAt",
+				message."updatedAt",
 				sender.id AS sender_id,
 				sender.name AS sender_name,
 				sender.username AS sender_username,
@@ -121,6 +123,7 @@ export class ListContactMessagesPostgresRepository
 				message,
 				type,
 				createdAt,
+				updatedAt,
 				sender_id,
 				sender_name,
 				sender_username,
@@ -172,6 +175,7 @@ export class ListContactMessagesPostgresRepository
 				message,
 				type,
 				createdAt,
+				updatedAt,
 
 				sender: {
 					id: sender_id,
