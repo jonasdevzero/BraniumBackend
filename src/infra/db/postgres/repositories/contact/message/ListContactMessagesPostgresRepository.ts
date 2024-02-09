@@ -1,6 +1,9 @@
 import { ListContactMessagesRepository } from '@data/protocols';
-import { ListContactMessagesDTO } from '@domain/dtos/contact';
-import { LoadedMessage, MessageFileType, MessageType } from '@domain/models';
+import {
+	ListContactMessagesDTO,
+	ListContactMessagesResultDTO,
+} from '@domain/dtos/contact';
+import { MessageFileType, MessageType } from '@domain/models';
 import { sql } from '@infra/db/postgres/connection';
 
 interface Row {
@@ -24,23 +27,30 @@ interface Row {
 	file_user_key?: string;
 
 	reply_id?: string;
-	reply_key: string;
+	reply_key?: string;
 	reply_message?: string;
 	reply_type: MessageType;
+	reply_deleted: boolean;
 	reply_sender_id: string;
 	reply_sender_name: string;
 	reply_sender_username: string;
 }
 
+interface CountRow {
+	count: number;
+}
+
 export class ListContactMessagesPostgresRepository
 	implements ListContactMessagesRepository
 {
-	async list(data: ListContactMessagesDTO): Promise<LoadedMessage[]> {
+	async list(
+		data: ListContactMessagesDTO
+	): Promise<ListContactMessagesResultDTO> {
 		const { userId, contactId, page, limit } = data;
 
 		const offset = page * limit;
 
-		const rows = await sql<Row[]>`
+		const rowsPromise = sql<Row[]>`
 			SELECT
 				message.id,
 				real_message_user.key,
@@ -62,6 +72,7 @@ export class ListContactMessagesPostgresRepository
 				reply_user.key AS reply_key,
 				reply.message AS reply_message,
 				reply.type AS reply_type,
+				reply.deleted AS reply_deleted,
 				reply_sender.id AS reply_sender_id,
 				reply_sender.name AS reply_sender_name,
 				reply_sender.username AS reply_sender_username
@@ -71,15 +82,12 @@ export class ListContactMessagesPostgresRepository
 				LEFT JOIN public.message AS inner_message
 					ON inner_message."groupId" IS NULL
 					AND inner_message.id = message_user."messageId"
-				WHERE 
-				(
-					message_user."userId"  = ${userId} 
-					AND inner_message."senderId" = ${contactId}
-				)
-				OR (
-					message_user."userId" = ${contactId}
-					AND inner_message."senderId" = ${userId}
-				)
+					AND inner_message.deleted IS FALSE
+				WHERE message_user."userId" = ${userId}
+					AND (
+						inner_message."senderId" = ${contactId}
+						OR inner_message."senderId" = ${userId} 
+					)
 				LIMIT ${limit}
 				OFFSET ${offset}
 			) AS message_user
@@ -115,6 +123,21 @@ export class ListContactMessagesPostgresRepository
 				reply_sender.id
 			ORDER BY message."createdAt" DESC;
 		`;
+		const countPromise = sql<CountRow[]>`
+			SELECT COUNT(DISTINCT message.id) AS count
+			FROM public."messageUser" AS message_user
+			LEFT JOIN public.message AS message
+				ON message."groupId" IS NULL
+				AND message.id = message_user."messageId"
+				AND message.deleted IS FALSE
+			WHERE message_user."userId" = ${userId}
+				AND (
+					message."senderId" = ${contactId}
+					OR message."senderId" = ${userId} 
+				)
+		`;
+
+		const [rows, countRows] = await Promise.all([rowsPromise, countPromise]);
 
 		const messages = this.groupBy(rows, 'id').map((row) => {
 			const {
@@ -133,20 +156,22 @@ export class ListContactMessagesPostgresRepository
 				reply_key,
 				reply_message,
 				reply_type,
+				reply_deleted,
 
 				reply_sender_id,
 				reply_sender_name,
 				reply_sender_username,
 			} = row[0];
 
-			let reply;
+			let reply = null;
 
 			if (!!reply_id) {
 				reply = {
 					id: String(reply_id),
-					key: reply_key,
+					key: reply_key || null,
 					message: reply_message,
 					type: reply_type,
+					deleted: reply_deleted,
 
 					sender: {
 						id: reply_sender_id,
@@ -189,7 +214,10 @@ export class ListContactMessagesPostgresRepository
 			};
 		});
 
-		return messages;
+		const count = Number(countRows[0]?.count) || 0;
+		const pages = Math.ceil(count / limit);
+
+		return { pages, content: messages };
 	}
 
 	private groupBy<D extends Array<any>>(data: D, key: keyof D[number]): D[] {

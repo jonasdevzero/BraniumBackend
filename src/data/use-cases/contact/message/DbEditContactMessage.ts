@@ -22,7 +22,7 @@ export class DbEditContactMessage implements EditContactMessage {
 
 		const message = await this.findMessageByIdRepository.find(messageId);
 
-		if (!message) {
+		if (!message || message.deleted) {
 			throw new NotFoundError('message');
 		}
 

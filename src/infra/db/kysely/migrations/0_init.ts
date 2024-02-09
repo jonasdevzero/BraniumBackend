@@ -122,6 +122,7 @@ export async function up(db: Kysely<Database>): Promise<void> {
 			col.defaultTo(sql`now()`).notNull()
 		)
 		.addColumn('updatedAt', 'timestamp')
+		.addColumn('deleted', 'boolean', (col) => col.defaultTo(false))
 		.addForeignKeyConstraint('fk_message_sender', ['senderId'], 'profile', [
 			'id',
 		])
@@ -178,7 +179,8 @@ export async function up(db: Kysely<Database>): Promise<void> {
 			'fk_messageFileUser_file',
 			['fileId'],
 			'messageFile',
-			['id']
+			['id'],
+			(col) => col.onDelete('cascade')
 		)
 		.addForeignKeyConstraint('fk_messageFileUser_user', ['userId'], 'profile', [
 			'id',

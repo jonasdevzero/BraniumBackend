@@ -3,7 +3,10 @@ import {
 	GetFileUrlProvider,
 	ListContactMessagesRepository,
 } from '@data/protocols';
-import { ListContactMessagesDTO } from '@domain/dtos/contact';
+import {
+	ListContactMessagesDTO,
+	ListContactMessagesResultDTO,
+} from '@domain/dtos/contact';
 import { LoadedMessage } from '@domain/models';
 import { ListContactMessages } from '@domain/use-cases/contact/message';
 
@@ -17,11 +20,13 @@ export class DbListContactMessages implements ListContactMessages {
 		private readonly getFileUrlProvider: GetFileUrlProvider
 	) {}
 
-	async list(data: ListContactMessagesDTO): Promise<LoadedMessage[]> {
+	async list(
+		data: ListContactMessagesDTO
+	): Promise<ListContactMessagesResultDTO> {
 		const messages = await this.listContactMessagesRepository.list(data);
 
 		await Promise.all(
-			messages.map(async (message) => {
+			messages.content.map(async (message) => {
 				await Promise.all([
 					(async () => {
 						if (!message.sender.image) return;

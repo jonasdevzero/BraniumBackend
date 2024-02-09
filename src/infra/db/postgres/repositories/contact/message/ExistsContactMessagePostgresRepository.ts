@@ -22,6 +22,7 @@ export class ExistsContactMessagePostgresRepository
 					AND message."groupId" IS NULL
 					AND "user"."userId" IS NOT NULL
 					AND contact."userId" IS NOT NULL
+					AND message.deleted IS FALSE
 			)::BOOLEAN
 		`;
 

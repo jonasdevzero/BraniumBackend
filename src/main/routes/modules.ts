@@ -3,4 +3,6 @@ export const routeModules = {
 	invite: '/invite',
 	contact: '/contact',
 	'contact.message': '/contact/message',
+
+	message: '/message',
 };
