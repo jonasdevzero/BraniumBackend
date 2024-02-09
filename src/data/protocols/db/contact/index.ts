@@ -7,5 +7,3 @@ export * from './ListContactsRepository';
 export * from './EditContactRepository';
 
 export * from './LoadContactRepository';
-
-export * from './message';

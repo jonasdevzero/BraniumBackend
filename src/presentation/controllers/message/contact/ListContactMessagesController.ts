@@ -1,14 +1,14 @@
 import { inject } from '@container';
 import { controller, middlewares, route } from '@presentation/decorators';
 import { Controller, HttpRequest, HttpResponse } from '@presentation/protocols';
-import { ListContactMessages } from '@domain/use-cases/contact/message';
-import { ListContactMessagesValidator } from '@presentation/validators/contact';
 import { response } from '@presentation/helpers';
-import { ListContactMessagesDTO } from '@domain/dtos/contact';
+import { ListContactMessagesDTO } from '@domain/dtos/message/contact';
+import { ListContactMessagesValidator } from '@presentation/validators/message';
+import { ListContactMessages } from '@domain/use-cases/message/contact';
 
 @controller()
 @middlewares(ListContactMessagesValidator)
-@route.get('contact.message', '/:profileId/:contactId')
+@route.get('message.contact', '/:profileId/:contactId')
 export class ListContactMessagesController implements Controller {
 	constructor(
 		@inject.usecase('ListContactMessages')

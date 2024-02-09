@@ -6,14 +6,14 @@ import {
 	upload,
 } from '@presentation/decorators';
 import { Controller, HttpRequest, HttpResponse } from '@presentation/protocols';
-import { CreateContactMessage } from '@domain/use-cases/contact/message';
-import { CreateContactMessageValidator } from '@presentation/validators/contact';
 import { response } from '@presentation/helpers';
+import { CreateContactMessageValidator } from '@presentation/validators/message';
+import { CreateContactMessage } from '@domain/use-cases/message/contact';
 
 @controller()
 @upload({ nested: true })
 @middlewares(CreateContactMessageValidator)
-@route.post('contact.message', '/')
+@route.post('message.contact', '/')
 export class CreateContactMessageController implements Controller {
 	constructor(
 		@inject.usecase('CreateContactMessage')

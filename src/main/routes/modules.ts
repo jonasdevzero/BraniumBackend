@@ -2,7 +2,7 @@ export const routeModules = {
 	profile: '/profile',
 	invite: '/invite',
 	contact: '/contact',
-	'contact.message': '/contact/message',
 
 	message: '/message',
+	'message.contact': '/message/contact',
 };

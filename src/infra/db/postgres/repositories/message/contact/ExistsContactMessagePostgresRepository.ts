@@ -1,5 +1,5 @@
 import { ExistsContactMessageRepository } from '@data/protocols';
-import { ExistsContactMessageDTO } from '@domain/dtos/contact';
+import { ExistsContactMessageDTO } from '@domain/dtos/message/contact';
 import { sql } from '@infra/db/postgres/connection';
 
 export class ExistsContactMessagePostgresRepository

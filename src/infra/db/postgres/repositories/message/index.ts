@@ -9,3 +9,5 @@ export * from './DeleteMessagePostgresRepository';
 export * from './file';
 
 export * from './user';
+
+export * from './contact';

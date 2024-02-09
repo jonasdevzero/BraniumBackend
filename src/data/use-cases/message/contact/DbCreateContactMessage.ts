@@ -5,9 +5,9 @@ import {
 	LoadContactRepository,
 	UploadFileProvider,
 } from '@data/protocols';
-import { CreateContactMessageDTO } from '@domain/dtos/contact';
+import { CreateContactMessageDTO } from '@domain/dtos/message/contact';
 import { CreateMessageDTO } from '@domain/dtos/message';
-import { CreateContactMessage } from '@domain/use-cases/contact/message';
+import { CreateContactMessage } from '@domain/use-cases/message/contact';
 import {
 	BadRequestError,
 	NotAuthorizedError,

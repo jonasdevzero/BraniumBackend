@@ -6,10 +6,8 @@ import {
 import {
 	ListContactMessagesDTO,
 	ListContactMessagesResultDTO,
-} from '@domain/dtos/contact';
-import { LoadedMessage } from '@domain/models';
-import { ListContactMessages } from '@domain/use-cases/contact/message';
-
+} from '@domain/dtos/message/contact';
+import { ListContactMessages } from '@domain/use-cases/message/contact';
 @injectable()
 export class DbListContactMessages implements ListContactMessages {
 	constructor(

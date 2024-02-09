@@ -2,7 +2,7 @@ import { ListContactMessagesRepository } from '@data/protocols';
 import {
 	ListContactMessagesDTO,
 	ListContactMessagesResultDTO,
-} from '@domain/dtos/contact';
+} from '@domain/dtos/message/contact';
 import { MessageFileType, MessageType } from '@domain/models';
 import { sql } from '@infra/db/postgres/connection';
 

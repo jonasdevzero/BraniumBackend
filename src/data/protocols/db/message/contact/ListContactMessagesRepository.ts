@@ -1,9 +1,8 @@
 import {
 	ListContactMessagesDTO,
 	ListContactMessagesResultDTO,
-} from '@domain/dtos/contact';
-import { LoadedMessage } from '@domain/models';
+} from '@domain/dtos/message/contact';
 
-export interface ListContactMessages {
+export interface ListContactMessagesRepository {
 	list(data: ListContactMessagesDTO): Promise<ListContactMessagesResultDTO>;
 }
