@@ -3,12 +3,12 @@ import {
 	EditMessageRepository,
 	FindMessageByIdRepository,
 } from '@data/protocols';
-import { EditContactMessageDTO } from '@domain/dtos/contact';
-import { EditContactMessage } from '@domain/use-cases/contact/message';
+import { EditMessageDTO } from '@domain/dtos/message';
+import { EditMessage } from '@domain/use-cases/message';
 import { NotAuthorizedError, NotFoundError } from '@presentation/errors';
 
 @injectable()
-export class DbEditContactMessage implements EditContactMessage {
+export class DbEditMessage implements EditMessage {
 	constructor(
 		@inject('FindMessageByIdRepository')
 		private readonly findMessageByIdRepository: FindMessageByIdRepository,
@@ -17,8 +17,8 @@ export class DbEditContactMessage implements EditContactMessage {
 		private readonly editMessageRepository: EditMessageRepository
 	) {}
 
-	async edit(data: EditContactMessageDTO): Promise<void> {
-		const { messageId, profileId } = data;
+	async edit(data: EditMessageDTO, profileId: string): Promise<void> {
+		const messageId = data.id;
 
 		const message = await this.findMessageByIdRepository.find(messageId);
 

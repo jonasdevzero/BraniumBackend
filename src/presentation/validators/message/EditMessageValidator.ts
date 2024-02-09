@@ -3,7 +3,7 @@ import { HttpRequest, Middleware } from '@presentation/protocols';
 import { z } from 'zod';
 
 @validator
-export class EditContactMessageValidator implements Middleware {
+export class EditMessageValidator implements Middleware {
 	private readonly schema = z.object({
 		params: z
 			.object({
