@@ -3,38 +3,9 @@ import {
 	ListContactMessagesDTO,
 	ListContactMessagesResultDTO,
 } from '@domain/dtos/message/contact';
-import { MessageFileType, MessageType } from '@domain/models';
 import { sql } from '@infra/db/postgres/connection';
-
-interface Row {
-	id: string;
-	key: string;
-	message?: string;
-	type: MessageType;
-	createdAt: Date;
-	updatedAt?: Date | null;
-
-	sender_id: string;
-	sender_name: string;
-	sender_username: string;
-	sender_image?: string | null;
-
-	file_id?: string;
-	file_messageId?: string;
-	file_key?: string;
-	file_type?: MessageFileType;
-	file_user_fileId?: string;
-	file_user_key?: string;
-
-	reply_id?: string;
-	reply_key?: string;
-	reply_message?: string;
-	reply_type: MessageType;
-	reply_deleted: boolean;
-	reply_sender_id: string;
-	reply_sender_name: string;
-	reply_sender_username: string;
-}
+import { parseRawLoadedMessages } from '@infra/db/postgres/helpers';
+import { RawLoadedMessage } from '@infra/db/postgres/types';
 
 interface CountRow {
 	count: number;
@@ -50,7 +21,7 @@ export class ListContactMessagesPostgresRepository
 
 		const offset = page * limit;
 
-		const rowsPromise = sql<Row[]>`
+		const rowsPromise = sql<RawLoadedMessage[]>`
 			SELECT
 				message.id,
 				real_message_user.key,
@@ -135,93 +106,11 @@ export class ListContactMessagesPostgresRepository
 
 		const [rows, countRows] = await Promise.all([rowsPromise, countPromise]);
 
-		const messages = this.groupBy(rows, 'id').map((row) => {
-			const {
-				id,
-				key,
-				message,
-				type,
-				createdAt,
-				updatedAt,
-				sender_id,
-				sender_name,
-				sender_username,
-				sender_image,
-
-				reply_id,
-				reply_key,
-				reply_message,
-				reply_type,
-				reply_deleted,
-
-				reply_sender_id,
-				reply_sender_name,
-				reply_sender_username,
-			} = row[0];
-
-			let reply = null;
-
-			if (!!reply_id) {
-				reply = {
-					id: String(reply_id),
-					key: reply_key || null,
-					message: reply_message,
-					type: reply_type,
-					deleted: reply_deleted,
-
-					sender: {
-						id: reply_sender_id,
-						name: reply_sender_name,
-						username: reply_sender_username,
-					},
-				};
-			}
-
-			const files = this.groupBy(row, 'file_id')
-				.filter((f) => f[0].file_messageId === id)
-				.map((file) => {
-					const { file_id, file_key, file_type, file_user_key } = file[0];
-
-					return {
-						id: String(file_id),
-						url: String(file_key),
-						type: String(file_type) as MessageFileType,
-						key: String(file_user_key),
-					};
-				});
-
-			return {
-				id,
-				key,
-				message,
-				type,
-				createdAt,
-				updatedAt,
-
-				sender: {
-					id: sender_id,
-					name: sender_name,
-					username: sender_username,
-					image: sender_image,
-				},
-
-				reply,
-				files,
-			};
-		});
+		const messages = parseRawLoadedMessages(rows);
 
 		const count = Number(countRows[0]?.count) || 0;
 		const pages = Math.ceil(count / limit);
 
 		return { pages, content: messages };
-	}
-
-	private groupBy<D extends Array<any>>(data: D, key: keyof D[number]): D[] {
-		return data.reduce((groups, current: D) => {
-			const group = groups.find((g: any) => g[0][key] === current[key]);
-			group ? group.push(current) : groups.push([current]);
-
-			return groups;
-		}, [] as unknown as D[]);
 	}
 }

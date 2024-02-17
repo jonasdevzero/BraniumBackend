@@ -7,12 +7,11 @@ import { MessageFileUser } from '@domain/models';
 export class CreateMessagePostgresRepository
 	implements CreateMessageRepository
 {
-	async create(data: CreateMessageDTO): Promise<void> {
+	async create(data: CreateMessageDTO): Promise<string> {
 		const { users, files, ...rest } = data;
+		const id = randomUUID();
 
 		await sql.begin(async (sql) => {
-			const id = randomUUID();
-
 			const messageUsers = users.map((u) => ({
 				messageId: id,
 				userId: u.id,
@@ -46,5 +45,7 @@ export class CreateMessagePostgresRepository
 
 			await sql`INSERT INTO public."messageFileUser" ${sql(messageFilesUsers)}`;
 		});
+
+		return id;
 	}
 }

@@ -1,5 +1,5 @@
 import { CreateMessageDTO } from '@domain/dtos/message';
 
 export interface CreateMessageRepository {
-	create(data: CreateMessageDTO): Promise<void>;
+	create(data: CreateMessageDTO): Promise<string>;
 }

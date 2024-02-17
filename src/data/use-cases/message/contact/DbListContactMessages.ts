@@ -25,21 +25,13 @@ export class DbListContactMessages implements ListContactMessages {
 
 		await Promise.all(
 			messages.content.map(async (message) => {
-				await Promise.all([
-					(async () => {
-						if (!message.sender.image) return;
+				if (!message.sender.image) return;
 
-						const url = await this.getFileUrlProvider.get(
-							message.sender.image as string
-						);
+				const url = await this.getFileUrlProvider.get(
+					message.sender.image as string
+				);
 
-						Object.assign(message.sender, { image: url });
-					})(),
-					...message.files.map(async (file) => {
-						const url = await this.getFileUrlProvider.get(file.url);
-						Object.assign(file, { url });
-					}),
-				]);
+				Object.assign(message.sender, { image: url });
 			})
 		);
 
