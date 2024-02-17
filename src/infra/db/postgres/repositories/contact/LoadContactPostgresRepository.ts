@@ -11,6 +11,7 @@ export class LoadContactPostgresRepository implements LoadContactRepository {
 			SELECT
 				contact_profile.id,
 				contact_profile.name,
+				contact_profile.username,
 				contact.name AS "customName",
 				contact_profile.image,
 				contact.blocked AS "youBlocked",

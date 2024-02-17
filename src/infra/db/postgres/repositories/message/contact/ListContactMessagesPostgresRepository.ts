@@ -84,10 +84,8 @@ export class ListContactMessagesPostgresRepository
 					AND inner_message.id = message_user."messageId"
 					AND inner_message.deleted IS FALSE
 				WHERE message_user."userId" = ${userId}
-					AND (
-						inner_message."senderId" = ${contactId}
-						OR inner_message."senderId" = ${userId} 
-					)
+					AND message_user."contactId" = ${contactId}
+					AND inner_message.id IS NOT NULL
 				LIMIT ${limit}
 				OFFSET ${offset}
 			) AS message_user
@@ -131,10 +129,8 @@ export class ListContactMessagesPostgresRepository
 				AND message.id = message_user."messageId"
 				AND message.deleted IS FALSE
 			WHERE message_user."userId" = ${userId}
-				AND (
-					message."senderId" = ${contactId}
-					OR message."senderId" = ${userId} 
-				)
+				AND message_user."contactId" = ${contactId}
+				AND message.id IS NOT NULL
 		`;
 
 		const [rows, countRows] = await Promise.all([rowsPromise, countPromise]);

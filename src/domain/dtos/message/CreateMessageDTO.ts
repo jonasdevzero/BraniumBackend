@@ -11,6 +11,7 @@ export interface CreateMessageDTO {
 	users: Array<{
 		id: string;
 		key: string;
+		contactId?: string;
 	}>;
 
 	files: Array<{

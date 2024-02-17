@@ -17,6 +17,7 @@ export class CreateMessagePostgresRepository
 				messageId: id,
 				userId: u.id,
 				key: u.key,
+				contactId: u.contactId,
 			}));
 
 			const messageFilesUsers: MessageFileUser[] = [];

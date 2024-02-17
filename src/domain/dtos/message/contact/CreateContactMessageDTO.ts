@@ -5,10 +5,12 @@ export interface CreateContactMessageDTO {
 	sender: {
 		id: string;
 		key: string;
+		contactId: string;
 	};
 	receiver: {
 		id: string;
 		key: string;
+		contactId: string;
 	};
 
 	replyId?: string;

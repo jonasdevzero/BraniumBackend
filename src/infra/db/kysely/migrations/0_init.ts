@@ -136,6 +136,7 @@ export async function up(db: Kysely<Database>): Promise<void> {
 		.addColumn('messageId', 'uuid', (col) => col.notNull())
 		.addColumn('userId', 'uuid', (col) => col.notNull())
 		.addColumn('key', 'text', (col) => col.notNull())
+		.addColumn('contactId', 'uuid')
 		.addPrimaryKeyConstraint('pk_messageUser', ['messageId', 'userId'])
 		.addForeignKeyConstraint(
 			'fk_messageUser_message',

@@ -92,6 +92,25 @@ export class DbCreateContactMessage implements CreateContactMessage {
 		if (contact.youBlocked) {
 			throw new BadRequestError('You blocked this contact');
 		}
+
+		Object.assign(sender, { contactId: receiver.id });
+		Object.assign(receiver, { contactId: sender.id });
+	}
+
+	private async validateReply(data: CreateContactMessageDTO) {
+		const { replyId, sender, receiver } = data;
+
+		if (!replyId) return;
+
+		const exists = await this.existsContactMessageRepository.exists({
+			messageId: replyId,
+			userId: sender.id,
+			contactId: receiver.id,
+		});
+
+		if (!exists) {
+			throw new NotFoundError('reply message');
+		}
 	}
 
 	private async createMessage(data: CreateContactMessageDTO) {
@@ -115,21 +134,5 @@ export class DbCreateContactMessage implements CreateContactMessage {
 		};
 
 		await this.createMessageRepository.create(message);
-	}
-
-	private async validateReply(data: CreateContactMessageDTO) {
-		const { replyId, sender, receiver } = data;
-
-		if (!replyId) return;
-
-		const exists = await this.existsContactMessageRepository.exists({
-			messageId: replyId,
-			userId: sender.id,
-			contactId: receiver.id,
-		});
-
-		if (!exists) {
-			throw new NotFoundError('reply message');
-		}
 	}
 }
