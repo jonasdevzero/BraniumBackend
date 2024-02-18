@@ -9,10 +9,10 @@ export async function up(db: Kysely<Database>): Promise<void> {
 		.addColumn('username', 'text', (col) => col.notNull().unique())
 		.addColumn('name', 'text', (col) => col.notNull())
 		.addColumn('image', 'text')
-		.addColumn('createdAt', 'timestamp', (col) =>
+		.addColumn('createdAt', 'timestamptz', (col) =>
 			col.defaultTo(sql`now()`).notNull()
 		)
-		.addColumn('updatedAt', 'timestamp', (col) =>
+		.addColumn('updatedAt', 'timestamptz', (col) =>
 			col.defaultTo(sql`now()`).notNull()
 		)
 		.execute();
@@ -24,7 +24,7 @@ export async function up(db: Kysely<Database>): Promise<void> {
 		.addColumn('senderId', 'uuid', (col) => col.notNull())
 		.addColumn('receiverId', 'uuid', (col) => col.notNull())
 		.addColumn('message', 'text')
-		.addColumn('createdAt', 'timestamp', (col) =>
+		.addColumn('createdAt', 'timestamptz', (col) =>
 			col.defaultTo(sql`now()`).notNull()
 		)
 		.addForeignKeyConstraint(
@@ -50,7 +50,7 @@ export async function up(db: Kysely<Database>): Promise<void> {
 		.addColumn('contactId', 'uuid', (col) => col.notNull())
 		.addColumn('name', 'text')
 		.addColumn('blocked', 'boolean', (col) => col.notNull().defaultTo(false))
-		.addColumn('createdAt', 'timestamp', (col) =>
+		.addColumn('createdAt', 'timestamptz', (col) =>
 			col.notNull().defaultTo(sql`now()`)
 		)
 		.addPrimaryKeyConstraint('pk_contact', ['userId', 'contactId'])
@@ -77,10 +77,10 @@ export async function up(db: Kysely<Database>): Promise<void> {
 		.addColumn('name', 'text', (col) => col.notNull())
 		.addColumn('image', 'text')
 		.addColumn('description', 'text')
-		.addColumn('createdAt', 'timestamp', (col) =>
+		.addColumn('createdAt', 'timestamptz', (col) =>
 			col.notNull().defaultTo(sql`now()`)
 		)
-		.addColumn('updatedAt', 'timestamp', (col) =>
+		.addColumn('updatedAt', 'timestamptz', (col) =>
 			col.notNull().defaultTo(sql`now()`)
 		)
 		.execute();
@@ -96,7 +96,7 @@ export async function up(db: Kysely<Database>): Promise<void> {
 		.addColumn('groupId', 'uuid', (col) => col.notNull())
 		.addColumn('userId', 'uuid', (col) => col.notNull())
 		.addColumn('role', sql`"GroupUserRole"`, (col) => col.notNull())
-		.addColumn('createdAt', 'timestamp', (col) =>
+		.addColumn('createdAt', 'timestamptz', (col) =>
 			col.notNull().defaultTo(sql`now()`)
 		)
 		.addPrimaryKeyConstraint('pk_groupUser', ['groupId', 'userId'])
@@ -118,10 +118,10 @@ export async function up(db: Kysely<Database>): Promise<void> {
 		.addColumn('groupId', 'uuid')
 		.addColumn('message', 'text')
 		.addColumn('type', sql`"MessageType"`, (col) => col.notNull())
-		.addColumn('createdAt', 'timestamp', (col) =>
+		.addColumn('createdAt', 'timestamptz', (col) =>
 			col.defaultTo(sql`now()`).notNull()
 		)
-		.addColumn('updatedAt', 'timestamp')
+		.addColumn('updatedAt', 'timestamptz')
 		.addColumn('deleted', 'boolean', (col) => col.defaultTo(false))
 		.addForeignKeyConstraint('fk_message_sender', ['senderId'], 'profile', [
 			'id',
