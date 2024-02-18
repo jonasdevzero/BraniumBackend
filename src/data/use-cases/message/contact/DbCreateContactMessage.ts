@@ -2,14 +2,11 @@ import { inject, injectable } from '@container';
 import {
 	CreateMessageRepository,
 	ExistsContactMessageRepository,
-	GetFileUrlProvider,
 	LoadContactRepository,
-	LoadMessageRepository,
 	UploadFileProvider,
-	WebSocketServer,
 } from '@data/protocols';
-import { CreateContactMessageDTO } from '@domain/dtos/message/contact';
 import { CreateMessageDTO } from '@domain/dtos/message';
+import { CreateContactMessageDTO } from '@domain/dtos/message/contact';
 import { CreateContactMessage } from '@domain/use-cases/message/contact';
 import {
 	BadRequestError,
@@ -30,23 +27,12 @@ export class DbCreateContactMessage implements CreateContactMessage {
 		private readonly uploadFileProvider: UploadFileProvider,
 
 		@inject('CreateMessageRepository')
-		private readonly createMessageRepository: CreateMessageRepository,
-
-		@inject('LoadMessageRepository')
-		private readonly loadMessageRepository: LoadMessageRepository,
-
-		@inject('GetFileUrlProvider')
-		private readonly getFileUrlProvider: GetFileUrlProvider,
-
-		@inject('WebSocketServer')
-		private readonly ws: WebSocketServer
+		private readonly createMessageRepository: CreateMessageRepository
 	) {}
 
-	async create(data: CreateContactMessageDTO): Promise<void> {
+	async create(data: CreateContactMessageDTO): Promise<string> {
 		await this.validateAll(data);
-		const messageId = await this.createMessage(data);
-
-		await this.emitMessage(messageId, data.receiver.id, data.sender.id);
+		return this.createMessage(data);
 	}
 
 	private async validateAll(data: CreateContactMessageDTO) {
@@ -148,25 +134,5 @@ export class DbCreateContactMessage implements CreateContactMessage {
 		};
 
 		return this.createMessageRepository.create(message);
-	}
-
-	private async emitMessage(
-		messageId: string,
-		userId: string,
-		contactId: string
-	) {
-		const message = await this.loadMessageRepository.load({
-			messageId,
-			userId,
-		});
-
-		if (!message) return;
-
-		if (message.sender.image) {
-			const url = await this.getFileUrlProvider.get(message.sender.image);
-			Object.assign(message.sender, { image: url });
-		}
-
-		this.ws.emit([userId], 'contact:message:new', { contactId, message });
 	}
 }
