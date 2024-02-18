@@ -10,4 +10,5 @@ export interface LoadedContact {
 	youBlocked: boolean;
 
 	createdAt: Date;
+	lastUpdate: Date;
 }

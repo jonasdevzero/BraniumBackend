@@ -23,20 +23,34 @@ export class ListContactsPostgresRepository implements ListContactsRepository {
 					contact_profile.image,
 					contact.blocked AS "youBlocked",
 					left_contact.blocked AS blocked,
-					contact."createdAt"
+					COALESCE(last_message."createdAt", contact."createdAt") AS "lastUpdate"
 				FROM public.contact AS contact
 				LEFT JOIN public.contact AS left_contact
 					ON left_contact."userId" = contact."contactId"
 					AND left_contact."contactId" = contact."userId"
 				LEFT JOIN public.profile AS contact_profile
 					ON contact_profile.id = contact."contactId"
+				LEFT JOIN public.message AS last_message
+					ON last_message.id = (
+						SELECT inner_message.id
+						FROM public.message AS inner_message
+						LEFT JOIN public."messageUser" AS message_user
+							ON message_user."messageId" = inner_message.id
+							AND message_user."userId" = ${profileId}
+							AND message_user."contactId" = contact_profile.id
+						WHERE inner_message.deleted IS FALSE
+							AND inner_message."groupId" IS NULL
+							AND message_user."userId" IS NOT NULL
+						ORDER BY inner_message."createdAt" DESC
+						LIMIT 1
+					)
 				WHERE contact."userId" = ${profileId}
 					${
 						typeof search === 'string'
 							? sql`AND (contact_profile.name ILIKE ${`%${search}%`} OR contact_profile.username ILIKE ${`%${search}%`})`
 							: sql``
 					}
-				ORDER BY contact."createdAt" DESC
+				ORDER BY COALESCE(last_message."createdAt", contact."createdAt") DESC
 				LIMIT ${limit}
 				OFFSET ${offset}
 			`,
