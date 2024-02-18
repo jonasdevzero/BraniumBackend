@@ -57,6 +57,7 @@ export class ListContactMessagesPostgresRepository
 				WHERE message_user."userId" = ${userId}
 					AND message_user."contactId" = ${contactId}
 					AND inner_message.id IS NOT NULL
+				ORDER BY inner_message."createdAt" DESC
 				LIMIT ${limit}
 				OFFSET ${offset}
 			) AS message_user
