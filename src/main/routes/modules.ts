@@ -5,4 +5,6 @@ export const routeModules = {
 
 	message: '/message',
 	'message.contact': '/message/contact',
+
+	file: '/file',
 };
