@@ -6,7 +6,9 @@ import {
 	DeleteMessageUserRepository,
 	ExistsMessageUserRepository,
 	FindMessageByIdRepository,
+	ListAllMessageUsersRepository,
 	ListMessageFilesRepository,
+	WebSocketServer,
 } from '@data/protocols';
 import { MessageFile } from '@domain/models';
 import { DeleteMessage } from '@domain/use-cases/message';
@@ -34,19 +36,27 @@ export class DbDeleteMessage implements DeleteMessage {
 		private readonly deleteMessageFileUserRepository: DeleteMessageFileUserRepository,
 
 		@inject('DeleteFileProvider')
-		private readonly deleteFileProvider: DeleteFileProvider
+		private readonly deleteFileProvider: DeleteFileProvider,
+
+		@inject('ListAllMessageUsersRepository')
+		private readonly listAllMessageUsersRepository: ListAllMessageUsersRepository,
+
+		@inject('WebSocketServer')
+		private readonly ws: WebSocketServer
 	) {}
 
 	async delete(profileId: string, messageId: string): Promise<void> {
-		const [message, existsUserMessage, files] = await Promise.all([
+		const [message, users, files] = await Promise.all([
 			this.findMessageByIdRepository.find(messageId),
-			this.existsMessageUserRepository.exists({ messageId, userId: profileId }),
+			this.listAllMessageUsersRepository.list(messageId),
 			this.listMessageFilesRepository.list(messageId),
 		]);
 
 		if (!message || message.deleted) {
 			throw new NotFoundError('message');
 		}
+
+		const existsUserMessage = users.some((id) => profileId === id);
 
 		if (!existsUserMessage) {
 			throw new NotAuthorizedError('You cant delete this message');
@@ -66,16 +76,24 @@ export class DbDeleteMessage implements DeleteMessage {
 				),
 			]);
 
+			this.ws.emit([profileId], 'message:delete', messageId);
+
 			return;
 		}
 
 		await this.deleteMessageRepository.delete(messageId);
-		this.deleteFiles(files);
+		Promise.all([this.deleteFiles(files), this.emitEvent(messageId, users)]);
 	}
 
 	private async deleteFiles(files: MessageFile[]) {
 		await Promise.all(
 			files.map((file) => this.deleteFileProvider.delete(file.key))
 		);
+	}
+
+	private async emitEvent(messageId: string, users: string[]) {
+		if (!users.length) return;
+
+		this.ws.emit(users, 'message:delete', messageId);
 	}
 }
