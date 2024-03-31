@@ -40,6 +40,6 @@ export class CreateContactMessageController implements Controller {
 			},
 		]);
 
-		return response.created();
+		return response.created(messageId);
 	}
 }
