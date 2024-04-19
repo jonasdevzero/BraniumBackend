@@ -20,9 +20,6 @@ export class DbDeleteMessage implements DeleteMessage {
 		@inject('FindMessageByIdRepository')
 		private readonly findMessageByIdRepository: FindMessageByIdRepository,
 
-		@inject('ExistsMessageUserRepository')
-		private readonly existsMessageUserRepository: ExistsMessageUserRepository,
-
 		@inject('ListMessageFilesRepository')
 		private readonly listMessageFilesRepository: ListMessageFilesRepository,
 
