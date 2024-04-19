@@ -2,8 +2,11 @@ import { inject, injectable } from '@container';
 import {
 	EditMessageRepository,
 	FindMessageByIdRepository,
+	ListAllMessageUsersRepository,
+	WebSocketServer,
 } from '@data/protocols';
 import { EditMessageDTO } from '@domain/dtos/message';
+import { Message } from '@domain/models';
 import { EditMessage } from '@domain/use-cases/message';
 import { NotAuthorizedError, NotFoundError } from '@presentation/errors';
 
@@ -14,7 +17,13 @@ export class DbEditMessage implements EditMessage {
 		private readonly findMessageByIdRepository: FindMessageByIdRepository,
 
 		@inject('EditMessageRepository')
-		private readonly editMessageRepository: EditMessageRepository
+		private readonly editMessageRepository: EditMessageRepository,
+
+		@inject('ListAllMessageUsersRepository')
+		private readonly listAllMessageUsersRepository: ListAllMessageUsersRepository,
+
+		@inject('WebSocketServer')
+		private readonly ws: WebSocketServer
 	) {}
 
 	async edit(data: EditMessageDTO, profileId: string): Promise<void> {
@@ -36,6 +45,20 @@ export class DbEditMessage implements EditMessage {
 			id: messageId,
 			message: data.message,
 			type,
+		});
+
+		await this.emitEvent(message, data.message);
+	}
+
+	private async emitEvent(message: Message, editedText?: string) {
+		const users = await this.listAllMessageUsersRepository.list(message.id);
+
+		if (!users.length) return;
+
+		this.ws.emit(users, 'message:edit', {
+			messageId: message.id,
+			text: editedText || '',
+			updatedAt: new Date(),
 		});
 	}
 }

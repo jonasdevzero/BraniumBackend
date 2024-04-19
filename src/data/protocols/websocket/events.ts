@@ -7,5 +7,11 @@ export interface WebSocketEmitEvents {
 	'contact:new': LoadedContact;
 
 	'message:new': { message: LoadedMessage; roomId: string; type: RoomType };
+	'message:edit': {
+		messageId: string;
+
+		text: string;
+		updatedAt: Date;
+	};
 	'message:delete': string;
 }
