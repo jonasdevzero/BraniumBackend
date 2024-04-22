@@ -5,6 +5,7 @@ export interface WebSocketEmitEvents {
 	'invite:new': LoadedInvite;
 
 	'contact:new': LoadedContact;
+	'contact:block': { contactId: string; blocked: boolean };
 
 	'message:new': { message: LoadedMessage; roomId: string; type: RoomType };
 	'message:edit': {

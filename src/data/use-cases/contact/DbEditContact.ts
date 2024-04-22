@@ -1,5 +1,5 @@
 import { inject, injectable } from '@container';
-import { EditContactRepository } from '@data/protocols';
+import { EditContactRepository, WebSocketServer } from '@data/protocols';
 import { EditContactDTO } from '@domain/dtos/contact';
 import { EditContact } from '@domain/use-cases/contact';
 
@@ -7,10 +7,21 @@ import { EditContact } from '@domain/use-cases/contact';
 export class DbEditContact implements EditContact {
 	constructor(
 		@inject('EditContactRepository')
-		private readonly editContactRepository: EditContactRepository
+		private readonly editContactRepository: EditContactRepository,
+
+		@inject('WebSocketServer')
+		private readonly ws: WebSocketServer
 	) {}
 
 	async edit(data: EditContactDTO): Promise<void> {
+		const { contactId, profileId, blocked } = data;
+
 		await this.editContactRepository.edit(data);
+
+		if (typeof blocked === 'boolean')
+			this.ws.emit([contactId], 'contact:block', {
+				contactId: profileId,
+				blocked,
+			});
 	}
 }
