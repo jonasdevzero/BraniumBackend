@@ -3,7 +3,10 @@ import {
 	DeleteFileProvider,
 	EditProfileRepository,
 	FindProfileByIdRepository,
+	GetFileUrlProvider,
+	ListAllContactsRepository,
 	UploadFileProvider,
+	WebSocketServer,
 } from '@data/protocols';
 import { EditProfileDTO } from '@domain/dtos/profile';
 import { EditProfile } from '@domain/use-cases/profile';
@@ -23,7 +26,16 @@ export class DbEditProfile implements EditProfile {
 		private readonly editProfileRepository: EditProfileRepository,
 
 		@inject('DeleteFileProvider')
-		private readonly deleteFileProvider: DeleteFileProvider
+		private readonly deleteFileProvider: DeleteFileProvider,
+
+		@inject('ListAllContactsRepository')
+		private readonly listAllContactsRepository: ListAllContactsRepository,
+
+		@inject('GetFileUrlProvider')
+		private readonly getFileUrlProvider: GetFileUrlProvider,
+
+		@inject('WebSocketServer')
+		private readonly ws: WebSocketServer
 	) {}
 
 	async edit(data: EditProfileDTO, image?: FileModel): Promise<void> {
@@ -42,7 +54,24 @@ export class DbEditProfile implements EditProfile {
 
 		await this.editProfileRepository.edit(data);
 
-		if (!!profile.image && !!image)
-			await this.deleteFileProvider.delete(profile.image);
+		await Promise.all([
+			this.emitEvent(data),
+			profile.image && image
+				? this.deleteFileProvider.delete(profile.image)
+				: null,
+		]);
+	}
+
+	private async emitEvent(data: EditProfileDTO) {
+		const { profileId, ...rest } = data;
+
+		if (rest.image) {
+			const url = await this.getFileUrlProvider.get(rest.image);
+			Object.assign(rest, { image: url });
+		}
+
+		const contacts = await this.listAllContactsRepository.list(profileId);
+
+		this.ws.emit(contacts, 'contact:edit', { ...rest, userId: profileId });
 	}
 }

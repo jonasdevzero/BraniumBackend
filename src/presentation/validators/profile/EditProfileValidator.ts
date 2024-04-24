@@ -17,6 +17,7 @@ export class EditProfileValidator implements Middleware {
 		body: z
 			.object({
 				name: z.string().optional(),
+				image: z.null().optional(),
 			})
 			.strict(),
 	});

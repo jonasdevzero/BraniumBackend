@@ -6,6 +6,7 @@ export interface WebSocketEmitEvents {
 
 	'contact:new': LoadedContact;
 	'contact:block': { contactId: string; blocked: boolean };
+	'contact:edit': { userId: string; name?: string; image?: string | null };
 
 	'message:new': { message: LoadedMessage; roomId: string; type: RoomType };
 	'message:edit': {
