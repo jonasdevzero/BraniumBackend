@@ -23,6 +23,7 @@ export class ListContactsPostgresRepository implements ListContactsRepository {
 					contact_profile.image,
 					contact.blocked AS "youBlocked",
 					left_contact.blocked AS blocked,
+					contact."createdAt",
 					COALESCE(last_message."createdAt", contact."createdAt") AS "lastUpdate"
 				FROM public.contact AS contact
 				LEFT JOIN public.contact AS left_contact
