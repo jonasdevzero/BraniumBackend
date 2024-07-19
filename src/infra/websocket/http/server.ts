@@ -4,10 +4,10 @@ import crypto from 'node:crypto';
 import Event from 'node:events';
 import http from 'node:http';
 import type { Duplex } from 'node:stream';
-import { kRooms, kSocketEvents, kSocketRooms } from './config';
-import { constructFrame, parseFrame } from './helpers/frame';
-import { Socket } from './socket';
 import { authenticateConnection } from './authentication';
+import { kRooms, kSocketEvents, kSocketRooms } from './config';
+import { Socket } from './socket';
+import { Opcode, WebSocketFrameBuilder, WebSocketFrameParser } from './utils';
 
 export class WebsocketServerHttpAdapter implements WebSocketServer {
 	#event = new Event();
@@ -92,23 +92,32 @@ export class WebsocketServerHttpAdapter implements WebSocketServer {
 	}
 
 	#onSocketData(socket: Socket) {
-		return (frame: Buffer) => {
+		const parser = new WebSocketFrameParser();
+
+		return (buffer: Buffer) => {
 			try {
-				const data = parseFrame(frame);
+				const webSocketFrame = parser.parse(buffer);
 
-				if (!data) return;
+				if (!webSocketFrame.complete) return;
 
-				let { event, message } = JSON.parse(data);
+				if (webSocketFrame.close) {
+					socket.raw.end();
+					return;
+				}
 
-				message = message.map((argument: any, i: number) =>
-					argument == `${event}::callback:${i}`
+				const payload = webSocketFrame.text;
+
+				const { event, message } = JSON.parse(payload);
+
+				const processedMessage = message.map((argument: any, i: number) =>
+					argument === `${event}::callback:${i}`
 						? (...args: unknown[]) => socket.emit(argument, ...args)
 						: argument
 				);
 
-				this.#execEvent(socket, event, message);
+				this.#execEvent(socket, event, processedMessage);
 			} catch (error) {
-				console.error('Wrong event format!!', '\n', error);
+				console.log('error', error);
 			}
 		};
 	}
@@ -127,7 +136,6 @@ export class WebsocketServerHttpAdapter implements WebSocketServer {
 		return () => {
 			this.#execEvent(socket, 'disconnect');
 			this.#socketExitRooms(socket);
-			socket.raw.end();
 		};
 	}
 
@@ -146,13 +154,13 @@ export class WebsocketServerHttpAdapter implements WebSocketServer {
 		}
 	}
 
-	#broadCast(target: string, data: Uint8Array) {
+	#broadCast(target: string, frame: Uint8Array) {
 		const room: Map<string, Socket> = this[kRooms].get(target);
 
 		if (!room || !room.size) return;
 
 		for (const [_, user] of room) {
-			user.raw.write(data);
+			user.raw.write(frame);
 		}
 	}
 
@@ -161,8 +169,8 @@ export class WebsocketServerHttpAdapter implements WebSocketServer {
 	}
 
 	emit(to: string[], event: string, ...args: unknown[]): void {
-		const data = constructFrame({ event, message: args });
+		const frame = WebSocketFrameBuilder.build({ event, message: args });
 
-		for (const target of to) this.#broadCast(target, data);
+		for (const target of to) this.#broadCast(target, frame);
 	}
 }

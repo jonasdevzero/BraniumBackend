@@ -1,7 +1,7 @@
 import { SocketFn, WebSocket } from '@domain/models';
 import { Duplex } from 'node:stream';
 import { kRooms, kSocketEvents, kSocketRooms } from './config';
-import { constructFrame } from './helpers/frame';
+import { constructFrame } from '../../../../temp/code/frame';
 import { WebsocketServerHttpAdapter } from './server';
 import { randomUUID } from 'node:crypto';
 

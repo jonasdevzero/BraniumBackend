@@ -11,6 +11,6 @@ export interface WebSocket {
 	leave(room: string): void;
 }
 
-export type SocketFn = (...args: unknown[]) => void;
+export type SocketFn = (...args: any[]) => void;
 
 export type SocketEvent = 'connection';

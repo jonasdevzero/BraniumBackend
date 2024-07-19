@@ -1,5 +1,5 @@
 import { LoadedContact, LoadedInvite, LoadedMessage } from '@domain/models';
-import { RoomType } from '@domain/types';
+import { Call, RoomType } from '@domain/types';
 
 export interface WebSocketEmitEvents {
 	'invite:new': LoadedInvite;
@@ -16,4 +16,13 @@ export interface WebSocketEmitEvents {
 		updatedAt: Date;
 	};
 	'message:delete': string;
+
+	'call:income': Call.Income;
+	'call:canceled': string;
+	'call:declined': string;
+	'call:accepted': Call.Connection;
+	'call:list-users': Call.ListUsers;
+	'call:connection': Call.Connection;
+	'call:ice-candidate': Call.IceCandidate;
+	'call:leave': string;
 }
